@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { SimulationInput } from '@/types/simulation';
+import { Transaction } from '@/types/ledger';
 import AmountInput from './amount-input';
 
 const DEFAULT_SIMULATION_INPUT: SimulationInput = {
@@ -28,6 +29,9 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
     monthlySavings?: string;
     targetAsset?: string;
   }>({});
+
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | undefined>();
 
   // 월 저축액 자동 계산 헬퍼 함수
   const calculateMonthlySavings = (income: number, expense: number): number => {
@@ -85,6 +89,83 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
     }
   };
 
+  // 가계부 최근 3개월 평균을 시뮬레이터 기본값으로 가져오기
+  const handleImportFromLedger = async () => {
+    setIsImporting(true);
+    setImportError(undefined);
+
+    try {
+      const response = await fetch('/api/transactions');
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+      const data = await response.json();
+      const transactions = data.transactions as Transaction[];
+
+      // 최근 3개월 (완료된 월만, 진행 중인 이번 달 제외)
+      const today = new Date();
+      const targetMonths = new Set<string>();
+      for (let i = 1; i <= 3; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        targetMonths.add(ym);
+      }
+
+      // 월별 그룹핑 + 합계
+      const monthlyData = new Map<
+        string,
+        { income: number; expense: number }
+      >();
+      for (const t of transactions) {
+        const month = t.date.slice(0, 7);
+        if (!targetMonths.has(month)) continue;
+
+        const current = monthlyData.get(month) || { income: 0, expense: 0 };
+        if (t.type === 'income') {
+          current.income += t.amount;
+        } else {
+          current.expense += t.amount;
+        }
+        monthlyData.set(month, current);
+      }
+
+      if (monthlyData.size === 0) {
+        setImportError('가계부에 최근 3개월 데이터가 없습니다');
+        return;
+      }
+
+      // 평균 계산
+      let totalIncome = 0;
+      let totalExpense = 0;
+      monthlyData.forEach(({ income, expense }) => {
+        totalIncome += income;
+        totalExpense += expense;
+      });
+      const avgIncome = Math.round(totalIncome / monthlyData.size);
+      const avgExpense = Math.round(totalExpense / monthlyData.size);
+
+      setFormData({
+        ...formData,
+        monthlyIncome: avgIncome,
+        monthlyExpense: avgExpense,
+        monthlySavings: avgIncome - avgExpense,
+      });
+
+      // 영향받는 필드의 검증 에러 클리어
+      setErrors({
+        ...errors,
+        monthlyIncome: undefined,
+        monthlyExpense: undefined,
+        monthlySavings: undefined,
+      });
+    } catch (error) {
+      console.error('Failed to import from ledger:', error);
+      setImportError('가계부 데이터를 불러오는데 실패했습니다');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sticky top-8">
       <h2 className="text-base font-semibold text-slate-900 mb-6">입력 정보</h2>
@@ -117,6 +198,17 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
             </span>
             월간 계획
           </h3>
+          <button
+            type="button"
+            onClick={handleImportFromLedger}
+            disabled={isImporting}
+            className="w-full rounded-lg border-2 border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isImporting ? '불러오는 중...' : '📥 가계부에서 가져오기'}
+          </button>
+          {importError && (
+            <p className="text-xs text-red-600">{importError}</p>
+          )}
           <div className="space-y-4">
             <AmountInput
               label="월 고정 수입"
