@@ -111,38 +111,26 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
         targetMonths.add(ym);
       }
 
-      // 월별 그룹핑 + 합계
-      const monthlyData = new Map<
-        string,
-        { income: number; expense: number }
-      >();
+      // 타깃 월에 속하는 거래만 합산
+      const monthsWithData = new Set<string>();
+      let totalIncome = 0;
+      let totalExpense = 0;
       for (const t of transactions) {
         const month = t.date.slice(0, 7);
         if (!targetMonths.has(month)) continue;
 
-        const current = monthlyData.get(month) || { income: 0, expense: 0 };
-        if (t.type === 'income') {
-          current.income += t.amount;
-        } else {
-          current.expense += t.amount;
-        }
-        monthlyData.set(month, current);
+        monthsWithData.add(month);
+        if (t.type === 'income') totalIncome += t.amount;
+        else totalExpense += t.amount;
       }
 
-      if (monthlyData.size === 0) {
+      if (monthsWithData.size === 0) {
         setImportError('가계부에 최근 3개월 데이터가 없습니다');
         return;
       }
 
-      // 평균 계산
-      let totalIncome = 0;
-      let totalExpense = 0;
-      monthlyData.forEach(({ income, expense }) => {
-        totalIncome += income;
-        totalExpense += expense;
-      });
-      const avgIncome = Math.round(totalIncome / monthlyData.size);
-      const avgExpense = Math.round(totalExpense / monthlyData.size);
+      const avgIncome = Math.round(totalIncome / monthsWithData.size);
+      const avgExpense = Math.round(totalExpense / monthsWithData.size);
 
       setFormData({
         ...formData,
