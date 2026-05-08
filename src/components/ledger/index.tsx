@@ -5,7 +5,7 @@ import LedgerSummary from '@/components/ledger/ledger-summary';
 import LedgerStatistics from '@/components/ledger/ledger-statistics';
 import LedgerList from '@/components/ledger/ledger-list';
 import { formatYearMonth, getPreviousMonth, getNextMonth } from '@/lib/ledger';
-import { ArrowLeftIcon, ArrowRightIcon } from '@/components/icons';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLedgerData } from '@/hooks/useLedgerData';
 
 // 가계부 본문: 월 이동, 요약, 입력 폼, 통계, 목록.
@@ -34,7 +34,7 @@ export default function Ledger() {
           className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
           title="이전 달"
         >
-          <ArrowLeftIcon className="w-6 h-6 text-slate-600" />
+          <ChevronLeft className="w-6 h-6 text-slate-600" />
         </button>
         <h2 className="text-2xl font-bold text-slate-900">
           {formatYearMonth(selectedMonth)}
@@ -44,7 +44,7 @@ export default function Ledger() {
           className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
           title="다음 달"
         >
-          <ArrowRightIcon className="w-6 h-6 text-slate-600" />
+          <ChevronRight className="w-6 h-6 text-slate-600" />
         </button>
       </div>
 

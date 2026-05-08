@@ -3,7 +3,7 @@
 import { Transaction, TransactionType } from '@/types/ledger';
 import { getCategoryLabel } from '@/lib/ledger';
 import { formatNumber } from '@/lib/format';
-import { TrashIcon } from '@/components/icons';
+import { Trash2 } from 'lucide-react';
 
 interface LedgerListProps {
   transactions: Transaction[];
@@ -135,7 +135,7 @@ export default function LedgerList({
                       className="text-slate-400 hover:text-rose-600 transition-colors shrink-0"
                       aria-label="거래 삭제"
                     >
-                      <TrashIcon className="w-5 h-5" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

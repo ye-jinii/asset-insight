@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { SimulationResult } from '@/types/simulation';
 import { formatNumber } from '@/lib/format';
-import { WarningIcon } from '../icons';
+import { TriangleAlert } from 'lucide-react';
 
 interface WarningResultProps {
   result: SimulationResult;
@@ -37,7 +37,7 @@ export default function WarningResult({ result }: WarningResultProps) {
       {/* 경고 메시지 */}
       <div className="rounded-xl border-2 border-rose-200 bg-linear-to-br from-rose-50 to-white p-6 sm:p-8 shadow-md">
         <div className="flex items-center gap-3">
-          <WarningIcon className="h-5 w-5 text-rose-600" />
+          <TriangleAlert className="h-5 w-5 text-rose-600" />
           <h2 className="text-base sm:text-lg font-bold text-rose-900">
             목표 달성까지 너무 오래 걸립니다
           </h2>

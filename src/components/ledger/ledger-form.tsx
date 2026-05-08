@@ -7,7 +7,7 @@ import {
   Transaction,
 } from '@/types/ledger';
 import AmountInput from '../simulator/amount-input';
-import { ChevronDownIcon } from '../icons';
+import { ChevronDown } from 'lucide-react';
 
 interface LedgerFormProps {
   onCreate?: (data: TransactionInput) => Promise<void>;
@@ -48,7 +48,7 @@ const SelectField = ({
         {children}
       </select>
       <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
-        <ChevronDownIcon />
+        <ChevronDown className="w-4 h-4" />
       </div>
     </div>
   </div>

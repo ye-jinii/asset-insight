@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { SimulationResult } from '@/types/simulation';
 import { formatNumber } from '@/lib/format';
 import { calculateComparison } from '@/lib/simulation';
-import { ArrowUpIcon, ArrowDownIcon } from '../icons';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 
 interface SuccessResultProps {
   result: SimulationResult;
@@ -114,7 +114,7 @@ export default function SuccessResult({ result }: SuccessResultProps) {
           <div className="p-5 rounded-xl bg-linear-to-br from-emerald-50 to-emerald-100/50 border-2 border-emerald-200">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center">
-                <ArrowUpIcon className="w-5 h-5 text-white" />
+                <ArrowUp className="w-5 h-5 text-white" />
               </div>
               <div className="text-sm font-bold text-emerald-900">
                 {adjustmentPercentage}% 증가
@@ -157,7 +157,7 @@ export default function SuccessResult({ result }: SuccessResultProps) {
           <div className="p-5 rounded-xl bg-linear-to-br from-rose-50 to-rose-100/50 border-2 border-rose-200">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-rose-600 flex items-center justify-center">
-                <ArrowDownIcon className="w-5 h-5 text-white" />
+                <ArrowDown className="w-5 h-5 text-white" />
               </div>
               <div className="text-sm font-bold text-rose-900">
                 {adjustmentPercentage}% 감소

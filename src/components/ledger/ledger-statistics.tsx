@@ -140,7 +140,7 @@ export default function LedgerStatistics({
   return (
     <div className="w-full h-full rounded-xl border-2 border-purple-200 bg-white shadow-sm overflow-hidden flex flex-col">
       {/* 카드 헤더 */}
-      <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-purple-50 to-pink-50">
+      <div className="p-6 border-b border-slate-100 bg-linear-to-r from-purple-50 to-pink-50">
         <h3 className="text-base font-semibold text-slate-900">지출 분석</h3>
       </div>
 
@@ -203,7 +203,7 @@ export default function LedgerStatistics({
 
         {/* 지출 인사이트 카드 - 일 평균, 최대 지출, 거래 횟수 요약 */}
         {insights && (
-          <div className="mt-6 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+          <div className="mt-6 rounded-2xl border border-purple-100 bg-linear-to-br from-purple-50 to-pink-50 p-6">
             {/* 인사이트 섹션 헤더 */}
             <div className="flex items-center gap-2 mb-4">
               <span className="text-lg">📊</span>

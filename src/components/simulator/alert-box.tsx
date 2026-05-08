@@ -1,4 +1,4 @@
-import { InfoIcon, WarningIcon } from '../icons';
+import { Info, TriangleAlert } from 'lucide-react';
 
 type AlertType = 'info' | 'warning';
 
@@ -25,7 +25,7 @@ const alertStyles = {
 
 export default function AlertBox({ type, title, message }: AlertBoxProps) {
   const styles = alertStyles[type];
-  const Icon = type === 'info' ? InfoIcon : WarningIcon;
+  const Icon = type === 'info' ? Info : TriangleAlert;
 
   return (
     <div className={`rounded-xl border ${styles.container} p-6`}>
