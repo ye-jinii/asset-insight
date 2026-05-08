@@ -12,6 +12,7 @@ const DEFAULT_SIMULATION_INPUT: SimulationInput = {
   monthlyExpense: 2000000, // 200만원
   monthlySavings: 1000000, // 100만원
   targetAsset: 100000000, // 1억원
+  annualReturn: 4, // 4% (보수적 가정)
 };
 
 export default function AssetSimulator() {

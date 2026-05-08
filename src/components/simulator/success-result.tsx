@@ -76,7 +76,7 @@ export default function SuccessResult({ result }: SuccessResultProps) {
             <div className="text-right font-mono tabular-nums min-w-0">
               <div className="flex items-baseline justify-end flex-wrap gap-1">
                 <span className="text-xl sm:text-2xl font-bold text-emerald-600 whitespace-nowrap">
-                  {formatNumber(result.finalAsset)}
+                  {formatNumber(Math.floor(result.finalAsset))}
                 </span>
                 <span className="text-sm sm:text-base font-medium text-slate-400">
                   원
@@ -84,6 +84,26 @@ export default function SuccessResult({ result }: SuccessResultProps) {
               </div>
             </div>
           </div>
+          {result.annualReturn > 0 && (
+            <div className="grid grid-cols-2 gap-3 pt-4 sm:pt-6 border-t-2 border-slate-100">
+              <div className="rounded-lg bg-slate-50 p-3">
+                <div className="text-xs text-slate-500 mb-1">납입 원금</div>
+                <div className="text-sm sm:text-base font-bold text-slate-700 font-mono tabular-nums">
+                  {formatNumber(Math.floor(result.totalContribution))}
+                  <span className="text-xs font-medium text-slate-400 ml-1">원</span>
+                </div>
+              </div>
+              <div className="rounded-lg bg-violet-50 p-3">
+                <div className="text-xs text-violet-700 mb-1">
+                  이자 ({result.annualReturn}%)
+                </div>
+                <div className="text-sm sm:text-base font-bold text-violet-700 font-mono tabular-nums">
+                  +{formatNumber(Math.floor(result.totalInterest))}
+                  <span className="text-xs font-medium text-violet-400 ml-1">원</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

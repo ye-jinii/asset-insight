@@ -4,6 +4,7 @@ export interface SimulationInput {
   monthlyExpense: number;
   monthlySavings: number;
   targetAsset: number;
+  annualReturn: number;
 }
 
 export interface SimulationResult {
@@ -13,4 +14,7 @@ export interface SimulationResult {
   monthlySavings: number;
   currentAsset: number;
   targetAsset: number;
+  annualReturn: number;
+  totalContribution: number;
+  totalInterest: number;
 }

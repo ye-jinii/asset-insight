@@ -11,7 +11,15 @@ const DEFAULT_SIMULATION_INPUT: SimulationInput = {
   monthlyExpense: 2000000, // 200만원
   monthlySavings: 1000000, // 100만원
   targetAsset: 100000000, // 1억원
+  annualReturn: 4, // 4% (보수적 가정)
 };
+
+const RETURN_PRESETS: { label: string; value: number }[] = [
+  { label: '예금 0%', value: 0 },
+  { label: '보수 4%', value: 4 },
+  { label: '일반 7%', value: 7 },
+  { label: '공격 10%', value: 10 },
+];
 
 interface SimulationFormProps {
   onSimulate: (input: SimulationInput) => void;
@@ -243,11 +251,64 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
           </div>
         </div>
 
+        {/* 예상 수익률 */}
+        <div className="space-y-3 p-5 rounded-xl bg-linear-to-br from-violet-50 to-violet-100/30 border-2 border-violet-200">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
+            <span className="w-7 h-7 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+              3
+            </span>
+            예상 수익률
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {RETURN_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                onClick={() =>
+                  setFormData({ ...formData, annualReturn: preset.value })
+                }
+                className={`px-3 py-1.5 text-xs rounded-md font-semibold transition-colors ${
+                  formData.annualReturn === preset.value
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'bg-white text-violet-700 border border-violet-300 hover:bg-violet-50'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700">
+              연수익률
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                max={50}
+                step={0.5}
+                value={formData.annualReturn}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    annualReturn: Number(e.target.value),
+                  })
+                }
+                className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-right text-slate-900 font-mono tabular-nums focus:outline-none focus:ring-2 focus:border-violet-500 focus:ring-violet-500/20 transition-colors"
+              />
+              <span className="text-sm text-slate-400 w-4">%</span>
+            </div>
+            <p className="text-xs text-slate-500">
+              월 복리로 적용됩니다. 예금 0% / KOSPI 5년 평균 ~5% / S&P500 ~10%
+            </p>
+          </div>
+        </div>
+
         {/* 목표 */}
         <div className="space-y-3 p-5 rounded-xl bg-linear-to-br from-amber-50 to-amber-100/30 border-2 border-amber-200">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1">
             <span className="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-              3
+              4
             </span>
             목표
           </h3>

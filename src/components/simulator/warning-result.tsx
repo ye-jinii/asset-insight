@@ -3,6 +3,10 @@
 import { useMemo } from 'react';
 import { SimulationResult } from '@/types/simulation';
 import { formatNumber } from '@/lib/format';
+import {
+  calculateAchievableTarget,
+  calculateRequiredMonthlySavings,
+} from '@/lib/simulation';
 import { TriangleAlert } from 'lucide-react';
 
 interface WarningResultProps {
@@ -13,17 +17,20 @@ export default function WarningResult({ result }: WarningResultProps) {
   // 목표 기간 (20년 = 240개월)
   const targetMonths = 20 * 12;
 
-  // 해결 방법 계산
+  // 해결 방법 계산 (월 복리 적용)
   const suggestions = useMemo(() => {
-    // 실제 목표까지의 차이 (현재 자산에서 목표 자산까지)
-    const gap = result.targetAsset - result.currentAsset;
+    const requiredMonthlySavings = calculateRequiredMonthlySavings(
+      result.currentAsset,
+      result.targetAsset,
+      result.annualReturn,
+      targetMonths
+    );
 
-    // 1. 20년 안에 달성하려면 필요한 월 저축액
-    const requiredMonthlySavings = Math.ceil(gap / targetMonths);
-
-    // 2. 현재 월 저축액으로 20년 안에 달성 가능한 목표 자산
-    const achievableTarget = Math.floor(
-      result.currentAsset + result.monthlySavings * targetMonths
+    const achievableTarget = calculateAchievableTarget(
+      result.currentAsset,
+      result.monthlySavings,
+      result.annualReturn,
+      targetMonths
     );
 
     return {
