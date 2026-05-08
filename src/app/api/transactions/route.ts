@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Transaction, TransactionInput } from '@/types/ledger';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-// 데이터 파일 경로 (프로젝트 루트의 data 디렉토리)
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DATA_FILE = path.join(DATA_DIR, 'transactions.json');
+import { loadTransactions, saveTransactions } from '@/lib/transactions-store';
 
 const VALID_TYPES = ['income', 'expense'] as const;
 const VALID_CATEGORIES = [
@@ -49,41 +44,6 @@ function validateTransactionInput(body: unknown): string | null {
     return 'Invalid memo (must be a string)';
   }
   return null;
-}
-
-/**
- * 거래 데이터 파일에서 읽기
- * @returns 저장된 거래 내역 배열
- */
-async function loadTransactions(): Promise<Transaction[]> {
-  try {
-    // 데이터 디렉토리가 없으면 생성
-    await fs.mkdir(DATA_DIR, { recursive: true });
-
-    // 파일 읽기
-    const fileContent = await fs.readFile(DATA_FILE, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch {
-    // 파일이 없거나 읽기 실패 시 빈 배열 반환
-    return [];
-  }
-}
-
-/**
- * 거래 데이터를 파일에 저장
- * @param transactions 저장할 거래 내역 배열
- */
-async function saveTransactions(transactions: Transaction[]): Promise<void> {
-  try {
-    // 데이터 디렉토리가 없으면 생성
-    await fs.mkdir(DATA_DIR, { recursive: true });
-
-    // 파일에 저장 (들여쓰기 2칸으로 포맷팅)
-    await fs.writeFile(DATA_FILE, JSON.stringify(transactions, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error saving transactions:', error);
-    throw error;
-  }
 }
 
 /**

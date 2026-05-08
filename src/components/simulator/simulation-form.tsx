@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { SimulationInput } from '@/types/simulation';
+import { CoachAdvice, ScenarioChanges, SimulationInput } from '@/types/simulation';
 import { Transaction } from '@/types/ledger';
 import AmountInput from './amount-input';
+import AiCoachCard from './ai-coach-card';
+import { Sparkles } from 'lucide-react';
 
 const DEFAULT_SIMULATION_INPUT: SimulationInput = {
   currentAsset: 10000000, // 1천만원
@@ -40,6 +42,10 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
 
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | undefined>();
+
+  const [aiAdvice, setAiAdvice] = useState<CoachAdvice | null>(null);
+  const [isAskingAi, setIsAskingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | undefined>();
 
   // 월 저축액 자동 계산 헬퍼 함수
   const calculateMonthlySavings = (income: number, expense: number): number => {
@@ -94,6 +100,33 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
     e.preventDefault();
     if (validateForm()) {
       onSimulate(formData);
+    }
+  };
+
+  // AI 코치에게 자산배분/추천 수익률 요청
+  const handleAskAi = async () => {
+    setIsAskingAi(true);
+    setAiError(undefined);
+    setAiAdvice(null);
+
+    try {
+      const response = await fetch('/api/ai/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setAiError(data.error || 'AI 호출에 실패했습니다');
+        return;
+      }
+      setAiAdvice(data as CoachAdvice);
+    } catch (error) {
+      console.error('AI coach call failed:', error);
+      setAiError('네트워크 오류가 발생했습니다');
+    } finally {
+      setIsAskingAi(false);
     }
   };
 
@@ -259,6 +292,36 @@ export default function SimulationForm({ onSimulate }: SimulationFormProps) {
             </span>
             예상 수익률
           </h3>
+          <button
+            type="button"
+            onClick={handleAskAi}
+            disabled={isAskingAi}
+            className="w-full rounded-lg border-2 border-violet-300 bg-white px-3 py-2 text-sm font-semibold text-violet-700 hover:bg-violet-50 hover:border-violet-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {isAskingAi ? 'AI에게 묻는 중...' : 'AI 조언받기'}
+          </button>
+          {aiError && <p className="text-xs text-red-600">{aiError}</p>}
+          {aiAdvice && (
+            <AiCoachCard
+              advice={aiAdvice}
+              onApplyScenario={(changes: ScenarioChanges) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  monthlySavings:
+                    changes.monthlySavings ?? prev.monthlySavings,
+                  annualReturn: changes.annualReturn ?? prev.annualReturn,
+                  targetAsset: changes.targetAsset ?? prev.targetAsset,
+                }));
+                if (changes.monthlySavings !== undefined) {
+                  clearError('monthlySavings');
+                }
+                if (changes.targetAsset !== undefined) {
+                  clearError('targetAsset');
+                }
+              }}
+            />
+          )}
           <div className="flex flex-wrap gap-2">
             {RETURN_PRESETS.map((preset) => (
               <button
