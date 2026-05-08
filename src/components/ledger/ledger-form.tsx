@@ -6,19 +6,21 @@ import {
   TransactionInput,
   Transaction,
 } from '@/types/ledger';
+import { getDefaultDateForMonth } from '@/lib/ledger';
 import AmountInput from '../simulator/amount-input';
 import { ChevronDown } from 'lucide-react';
 
 interface LedgerFormProps {
+  selectedMonth: string;
   onCreate?: (data: TransactionInput) => Promise<void>;
   editingTransaction?: Transaction | null;
   onUpdate?: (transaction: Transaction) => Promise<void>;
   onCancelEdit?: () => void;
 }
 
-// 폼 초기값 생성 (오늘 날짜, 지출, 식비, 0원)
-const getInitialFormData = (): TransactionInput => ({
-  date: new Date().toISOString().split('T')[0],
+// 폼 초기값 생성 (selectedMonth 기준 날짜, 지출, 식비, 0원)
+const getInitialFormData = (selectedMonth: string): TransactionInput => ({
+  date: getDefaultDateForMonth(selectedMonth),
   type: 'expense',
   category: 'food',
   amount: 0,
@@ -55,13 +57,15 @@ const SelectField = ({
 );
 
 export default function LedgerForm({
+  selectedMonth,
   onCreate,
   editingTransaction,
   onUpdate,
   onCancelEdit,
 }: LedgerFormProps) {
-  const [formData, setFormData] =
-    useState<TransactionInput>(getInitialFormData());
+  const [formData, setFormData] = useState<TransactionInput>(() =>
+    getInitialFormData(selectedMonth)
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -74,9 +78,9 @@ export default function LedgerForm({
         memo: editingTransaction.memo,
       });
     } else {
-      setFormData(getInitialFormData());
+      setFormData(getInitialFormData(selectedMonth));
     }
-  }, [editingTransaction]);
+  }, [editingTransaction, selectedMonth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,10 +98,10 @@ export default function LedgerForm({
           ...editingTransaction,
           ...formData,
         });
-        setFormData(getInitialFormData());
+        setFormData(getInitialFormData(selectedMonth));
       } else if (onCreate) {
         await onCreate(formData);
-        setFormData(getInitialFormData());
+        setFormData(getInitialFormData(selectedMonth));
       }
     } catch (error) {
       console.error('Failed to add/update transaction:', error);
@@ -112,7 +116,7 @@ export default function LedgerForm({
   };
 
   const handleCancel = () => {
-    setFormData(getInitialFormData());
+    setFormData(getInitialFormData(selectedMonth));
     if (onCancelEdit) {
       onCancelEdit();
     }

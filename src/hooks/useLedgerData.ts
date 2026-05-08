@@ -72,8 +72,14 @@ export function useLedgerData() {
         throw new Error('Failed to create transaction');
       }
 
-      // 생성 후 거래 내역 다시 불러오기
-      fetchTransactions();
+      // 거래 날짜의 월이 selectedMonth와 다르면 해당 월로 이동
+      // (selectedMonth 변경 시 fetchTransactions가 자동 재실행되므로 explicit 호출 불필요)
+      const transactionMonth = data.date.slice(0, 7);
+      if (transactionMonth !== selectedMonth) {
+        setSelectedMonth(transactionMonth);
+      } else {
+        fetchTransactions();
+      }
     } catch (error) {
       console.error('Failed to create transaction:', error);
       throw error;
@@ -131,9 +137,15 @@ export function useLedgerData() {
         throw new Error('Failed to update transaction');
       }
 
-      // 수정 모드 종료 및 거래 내역 다시 불러오기
       setEditingTransaction(null);
-      fetchTransactions();
+
+      // 거래 날짜의 월이 바뀌었으면 해당 월로 이동
+      const transactionMonth = updatedTransaction.date.slice(0, 7);
+      if (transactionMonth !== selectedMonth) {
+        setSelectedMonth(transactionMonth);
+      } else {
+        fetchTransactions();
+      }
     } catch (error) {
       console.error('Failed to update transaction:', error);
       throw error;

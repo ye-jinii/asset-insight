@@ -97,6 +97,25 @@ export function getNextMonth(yearMonth: string): string {
 }
 
 /**
+ * 선택된 월에 적합한 기본 날짜 반환
+ * - 오늘이 해당 월에 속하면 오늘 날짜
+ * - 아니면 해당 월의 1일
+ * @param yearMonth - 기준 년월 (YYYY-MM)
+ * @returns YYYY-MM-DD 형식의 날짜 문자열
+ */
+export function getDefaultDateForMonth(yearMonth: string): string {
+  const today = new Date();
+  const todayYearMonth = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, '0')}`;
+
+  if (todayYearMonth === yearMonth) {
+    return today.toISOString().split('T')[0];
+  }
+  return `${yearMonth}-01`;
+}
+
+/**
  * 카테고리별 지출 통계 계산
  * @param transactions - 거래 내역 배열
  * @returns 카테고리별 금액, 비중, 색상 정보 (금액 내림차순 정렬)

@@ -55,6 +55,7 @@ export default function Ledger() {
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-[400px_1fr] lg:items-stretch">
           <div className="flex">
             <LedgerForm
+              selectedMonth={selectedMonth}
               onCreate={handleCreate}
               editingTransaction={editingTransaction}
               onUpdate={handleUpdate}
