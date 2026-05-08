@@ -76,7 +76,6 @@ export function useLedgerData() {
       fetchTransactions();
     } catch (error) {
       console.error('Failed to create transaction:', error);
-      alert('거래 추가에 실패했습니다');
       throw error;
     }
   };
@@ -137,7 +136,7 @@ export function useLedgerData() {
       fetchTransactions();
     } catch (error) {
       console.error('Failed to update transaction:', error);
-      alert('거래 수정에 실패했습니다');
+      throw error;
     }
   };
 

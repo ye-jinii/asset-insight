@@ -7,6 +7,50 @@ import path from 'path';
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'transactions.json');
 
+const VALID_TYPES = ['income', 'expense'] as const;
+const VALID_CATEGORIES = [
+  'salary',
+  'food',
+  'transport',
+  'shopping',
+  'etc',
+] as const;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * 거래 입력값 검증
+ * @returns 에러 메시지 또는 null (검증 통과 시)
+ */
+function validateTransactionInput(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return 'Invalid request body';
+  const data = body as Record<string, unknown>;
+
+  if (typeof data.date !== 'string' || !DATE_REGEX.test(data.date)) {
+    return 'Invalid date (expected YYYY-MM-DD)';
+  }
+  if (
+    typeof data.type !== 'string' ||
+    !VALID_TYPES.includes(data.type as (typeof VALID_TYPES)[number])
+  ) {
+    return `Invalid type (expected one of: ${VALID_TYPES.join(', ')})`;
+  }
+  if (
+    typeof data.category !== 'string' ||
+    !VALID_CATEGORIES.includes(
+      data.category as (typeof VALID_CATEGORIES)[number]
+    )
+  ) {
+    return `Invalid category (expected one of: ${VALID_CATEGORIES.join(', ')})`;
+  }
+  if (typeof data.amount !== 'number' || data.amount <= 0) {
+    return 'Invalid amount (must be a positive number)';
+  }
+  if (typeof data.memo !== 'string') {
+    return 'Invalid memo (must be a string)';
+  }
+  return null;
+}
+
 /**
  * 거래 데이터 파일에서 읽기
  * @returns 저장된 거래 내역 배열
@@ -85,16 +129,21 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: TransactionInput = await request.json();
+    const body = await request.json();
 
-    // 고유 ID 생성 (타임스탬프 + 랜덤 문자열)
+    const validationError = validateTransactionInput(body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
+    const input = body as TransactionInput;
     const newTransaction: Transaction = {
-      id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      date: body.date,
-      type: body.type,
-      category: body.category,
-      amount: body.amount,
-      memo: body.memo,
+      id: `txn_${crypto.randomUUID()}`,
+      date: input.date,
+      type: input.type,
+      category: input.category,
+      amount: input.amount,
+      memo: input.memo,
       createdAt: new Date().toISOString(),
     };
 
@@ -124,13 +173,23 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const body: Transaction = await request.json();
+    const body = await request.json();
 
-    // 파일에서 기존 거래 내역 읽기
+    if (!body || typeof body.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Transaction id is required' },
+        { status: 400 }
+      );
+    }
+
+    const validationError = validateTransactionInput(body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
+    const updated = body as Transaction;
     const transactions = await loadTransactions();
-
-    // ID로 기존 거래 찾기
-    const index = transactions.findIndex((t) => t.id === body.id);
+    const index = transactions.findIndex((t) => t.id === updated.id);
 
     if (index === -1) {
       return NextResponse.json(
@@ -141,7 +200,7 @@ export async function PUT(request: NextRequest) {
 
     // 기존 createdAt은 유지하고 나머지 필드 업데이트
     transactions[index] = {
-      ...body,
+      ...updated,
       createdAt: transactions[index].createdAt,
     };
 
